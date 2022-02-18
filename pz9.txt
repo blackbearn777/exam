@@ -1,0 +1,61 @@
+CREATE DATABASE fin_slushba;
+USE fin_slushba;
+
+CREATE TABLE posada(
+id_pos INT PRIMARY KEY, 
+nazva_pos VARCHAR(30), 
+oklad_posadu INT); 
+
+CREATE TABLE zvanny(
+id_zvan INT PRIMARY KEY,
+name_zvan VARCHAR(30),
+oklad_zvanny INT);
+
+CREATE TABLE osob_slad(
+id_os INT PRIMARY KEY,
+PIB VARCHAR(30),
+pos_id INT REFERENCES posada(id_pos),
+zvan_id INT REFERENCES zvanny(id_zvan)); 
+
+INSERT INTO posada VALUES 
+(1,'Командир частини',5000),
+(2,'Начальник штабу',4900),
+(3,'Заступник з МПЗ',4800),
+(4,'Заступник з озброєння',4800),
+(5,'Заступник з тилу',4700),
+(6,'Командир батальйону',4500),
+(7,'Командир роти',4000),
+(8,'Командир взводу',3500),
+(9,'Старшина роти',3000),
+(10,'Командир відділення',2500);
+
+INSERT INTO zvanny VALUES 
+(1,'Полковник',5500), 
+(2,'Підполковник',4900),
+(3,'Майор',4500),
+(4,'Капітан',4300),
+(5,'Ст.Лейтенант',4000),
+(6,'Лейтенант',3600),
+(7,'Мол.Лейтенант',3400),
+(8,'Прапорщик',3200),
+(9,'Сержант',2700),
+(10,'Солдат',2300);
+
+INSERT INTO osob_slad VALUES 
+(1,'Іванов Іван',1,1),
+(2,'Петров Петро',2,2),
+(3,'Шевченко Олег',3,2),
+(4,'Морозов Микола',4,2),
+(5,'Сидоров Данило',5,3),
+(6,'Проценко Дмитро',6,3),
+(7,'Бурий Олександр',7,4),
+(8,'Білий Максим',8,5),
+(9,'Фролов Олексій',9,8),
+(10,'Комаров Іван',10,9);
+
+
+CREATE PROCEDURE ShowZP AS
+SELECT PIB,name_zvan,nazva_pos,oklad_posadu+oklad_zvanny AS zar_plata
+from osob_slad,zvanny,posada where pos_id=id_pos AND zvan_id=id_zvan
+
+EXEC ShowZP;

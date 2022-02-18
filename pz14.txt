@@ -1,0 +1,106 @@
+CREATE DATABASE rech_slushba;
+
+USE rech_slushba;
+
+CREATE TABLE forma_polova(
+id_forma INT PRIMARY KEY, 
+rozm_formu VARCHAR(30),
+kilk_formu INT,
+sklad VARCHAR(30)
+); 
+
+CREATE TABLE berci_demi(
+id_berc INT PRIMARY KEY, 
+rozm_berc VARCHAR(30),
+kilk_berc INT,
+sklad VARCHAR(30)
+);
+
+CREATE TABLE osob_sklad(
+id_os INT PRIMARY KEY,
+PIB VARCHAR(30),
+roz_formu float,
+roz_berc float,
+forma_id INT REFERENCES forma_polova(id_forma),
+berci_id INT REFERENCES berci_demi(id_berc)
+); 
+
+INSERT INTO forma_polova VALUES 
+(1,'Форма польва 44.3',2,'Склад №1'), 
+(2,'Форма польва 44.4',3,'Склад №2'),
+(3,'Форма польва 46.2',4,'Склад №1'),
+(4,'Форма польва 46.3',1,'Склад №2'),
+(5,'Форма польва 46.4',0,'Склад №1'),
+(6,'Форма польва 48.3',0,'Склад №2'),
+(7,'Форма польва 48.4',0,'Склад №1'),
+(8,'Форма польва 48.5',0,'Склад №2'),
+(9,'Форма польва 50.3',0,'Склад №1'),
+(10,'Форма польва 50.4',0,'Склад №2')
+;
+
+INSERT INTO berci_demi VALUES 
+(1,'Берци демісезонні 37',2,'Склад №1'),
+(2,'Берци демісезонні 38',2,'Склад №2'), 
+(3,'Берци демісезонні 39',3,'Склад №1'), 
+(4,'Берци демісезонні 40',1,'Склад №2'), 
+(5,'Берци демісезонні 41',2,'Склад №1'), 
+(6,'Берци демісезонні 42',0,'Склад №2'), 
+(7,'Берци демісезонні 43',0,'Склад №1'), 
+(8,'Берци демісезонні 44',0,'Склад №2'), 
+(9,'Берци демісезонні 45',0,'Склад №1'), 
+(10,'Берци демісезонні 46',0,'Склад №2')
+;
+
+INSERT INTO osob_sklad VALUES 
+(1,'Іванов Іван',44.3,37,1,1),
+(2,'Петров Петро',44.3,37,1,1),
+(3,'Шевченко Олег',44.4,38,2,2),
+(4,'Морозов Микола',44.4,38,2,2),
+(5,'Сидоров Данило',44.4,39,2,3),
+(6,'Проценко Дмитро',46.2,39,3,3),
+(7,'Бурий Олександр',46.2,39,3,3),
+(8,'Білий Максим',46.2,40,3,4),
+(9,'Фролов Олексій',46.2,41,3,5),
+(10,'Комаров Іван',46.3,41,4,5);
+
+GO
+CREATE TRIGGER Mayno_UPDATE /*Створюємо тригер з назвою ... */
+ON osob_sklad /* Який буде моніторити таблицю OSOB_SKLAD*/ 
+AFTER INSERT /*Якщо добавиться новий запис тобто в/c*/
+AS
+BEGIN
+DECLARE @forma_os INT /*Оголошуємо змінну @forma_os з типом даних INT яка буде відповідати за розмір форми */
+DECLARE @berci_os INT /*Оголошуємо змінну @berci_os з типом даних INT яка буде відповідати за розмір берц */
+SELECT @forma_os =(SELECT forma_id FROM INSERTED) /*Цій змінній присвоюється значення нового запису про розмір форми в таблиці */
+SELECT @berci_os =(SELECT berci_id FROM INSERTED) /*Цій змінній присвоюється значення нового запису про розмір берц в таблиці */
+UPDATE forma_polova SET kilk_formu = kilk_formu + 1 where id_forma = @forma_os /*Обновляєм записи в таблиці ФОРМИ добавляємо до к-ті форм +1 по id який передався через змінну*/
+UPDATE berci_demi SET kilk_berc = kilk_berc + 1 where id_berc = @berci_os /*Обновляєм записи в таблиці ФОРМИ добавляємо до к-ті берц +1 по id який передався через змінну*/
+END
+
+INSERT INTO osob_sklad VALUES 
+(11,'Коваленко Андрій',50.4,46,10,9);/* При добавленні нового запису в таблицю ОС автоматично добавляється +1 у відповідний розмір в таблиці берць і форми*/
+
+SELECT * FROM forma_polova; /*в таблиці форма під 10 айдішніком буде 1*/
+
+SELECT * FROM berci_demi;/*в таблиці берць +1 буде під 9 айдішником*/
+
+/*Такий самий тригер тільки на видалення */
+GO
+CREATE TRIGGER Mayno_DELETE
+ON osob_sklad 
+AFTER DELETE 
+AS
+BEGIN
+DECLARE @forma_os INT
+DECLARE @berci_os INT
+SELECT @forma_os =(SELECT forma_id FROM DELETED) 
+SELECT @berci_os =(SELECT berci_id FROM DELETED)
+UPDATE forma_polova SET kilk_formu = kilk_formu - 1 where id_forma = @forma_os 
+UPDATE berci_demi SET kilk_berc = kilk_berc - 1 where id_berc = @berci_os 
+END
+
+DELETE FROM osob_sklad WHERE id_os=11;
+
+SELECT * FROM berci_demi;
+
+SELECT * FROM forma_polova;

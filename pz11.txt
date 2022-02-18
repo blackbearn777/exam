@@ -1,0 +1,72 @@
+CREATE DATABASE slushba_kes;
+USE slushba_kes;
+
+/* 
+zag ----загальна
+pl -----площа
+*/
+
+CREATE TABLE budivli(
+id_bud INT PRIMARY KEY, 
+zag_nazva VARCHAR(30), 
+zag_pl_bud INT, 
+poverhiv INT); 
+
+CREATE TABLE kimnatu(
+id_kim INT PRIMARY KEY,
+nomer_kim INT,
+zag_nazva_kim VARCHAR(30), 
+zag_pl_kim INT,
+bud_id INT REFERENCES budivli(id_bud));
+
+CREATE TABLE mayno(
+id_mayno INT PRIMARY KEY,
+kil_stoliv INT,
+kil_stiltsiv INT,
+kil_shaf INT,
+kim_id INT REFERENCES kimnatu(id_kim)); 
+
+INSERT INTO budivli VALUES 
+(1,'Учбовий корпус',1200,4),/*("1"-id_будівлі, "Учбовий корпус"-назва будівлі, "1200"-площа будівлі,"3"-кількість поверхів*/
+(2,'Казарма першого факультету',700,3),
+(3,'Казарма другого факультету',900,3),
+(4,'Казарма третього факультету',860,3),
+(5,'Столова велика',900,1),
+(6,'Столова мала',500,1),
+(7,'Столова офіцерська',700,1),
+(8,'Спортзал',1000,2),
+(9,'КПП 1',200,1),
+(10,'КПП 2',100,1);
+
+INSERT INTO kimnatu VALUES 
+(1,101,'Аудиторія 101',150,1), /*("1"-id_кімнати, "101"-номер кімнати, "Аудиторія 101"-назва кімнати,"155"-площа кімнати,"1"-це id будівлі до якої привязується кімната*/
+(2,102,'Аудиторія 102',140,1),
+(3,103,'Аудиторія 103',110,1),
+(4,54,'Світлиця',80,2),
+(5,74,'Світлиця',90,3),
+(6,84,'Світлиця',100,4),
+(7,5,'Кухня',200,5),
+(8,6,'Кухня',150,6),
+(9,6,'Кухня',120,7),
+(10,33,'Кабінет начальника',20,8),
+(11,2,'Приміщення чергового КПП1',50,9),
+(12,3,'Приміщення чергового КПП2',50,10);
+
+INSERT INTO mayno VALUES 
+(1,15,32,5,1), /*("1"-id_списку_майна, "15"-столів, "32"-стільця,"5"-шаф,"1"-це id кімнати до якої привязується майно*/
+(2,10,22,3,2),
+(3,13,28,4,3),
+(4,8,16,2,4),
+(5,7,20,2,5),
+(6,9,20,2,6),
+(7,6,8,2,7),
+(8,4,5,2,8),
+(9,3,4,1,9),
+(10,1,3,2,10),
+(11,1,2,0,11),
+(12,1,2,0,12);
+
+CREATE PROCEDURE ShowAll AS 
+SELECT zag_nazva,nomer_kim,kil_stoliv,kil_stiltsiv,kil_shaf from budivli,kimnatu,mayno where bud_id=id_bud AND kim_id=id_kim
+
+EXEC ShowAll;
